@@ -3,6 +3,14 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0e1728"><title>Stromzähler LED-Messer</title>
+<meta name="application-name" content="Stromzähler">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Stromzähler">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
 <style>
 :root{color-scheme:dark;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0e1728;color:#f1f5f9}*{box-sizing:border-box}body{margin:0;padding:16px 14px 40px;max-width:750px;margin-inline:auto}h1{font-size:1.45rem;margin:10px 0 4px}h2{font-size:1.05rem;margin:0 0 10px}.muted{color:#9fb0c8;font-size:.87rem}section{background:#19263b;border:1px solid #293954;border-radius:16px;padding:15px;margin-top:14px}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.metric{background:#101d30;border-radius:12px;padding:13px}.metric strong{display:block;font-size:1.7rem;font-variant-numeric:tabular-nums}.metric span{font-size:.82rem;color:#aabbd3}.primary strong{font-size:2.4rem;color:#7ae4b6}button,input,select{font:inherit}button{border:0;border-radius:10px;padding:11px 15px;font-weight:650;background:#324966;color:#fff}button.main{background:#3ac790;color:#071c14}button:disabled{opacity:.5}input[type=number]{width:110px;background:#0e1728;border:1px solid #50627b;color:#fff;border-radius:8px;padding:7px}input[type=range]{width:100%;accent-color:#3ac790}.setting{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0}.cameraBox{position:relative;background:#050b14;border-radius:12px;overflow:hidden;aspect-ratio:4/3;max-height:320px}video{width:100%;height:100%;object-fit:cover}.target{position:absolute;left:50%;top:50%;width:64px;height:64px;transform:translate(-50%,-50%);border:2px solid #6bf0bc;border-radius:50%;box-shadow:0 0 0 999px #0003;pointer-events:none}.target:before,.target:after{content:"";position:absolute;background:#6bf0bc}.target:before{width:20px;height:1px;left:20px;top:30px}.target:after{height:20px;width:1px;left:30px;top:20px}.live{display:inline-block;width:9px;height:9px;border-radius:50%;background:#708196;margin-right:6px}.live.active{background:#3ce7a4}.live.flash{background:#ff4e69;box-shadow:0 0 10px #f54}#graph{width:100%;height:270px;display:block;border-radius:9px;background:#0e1728}.legend{font-size:.8rem;color:#bdcde1}#status{min-height:1.3em}.note{line-height:1.5}small{font-size:.8rem}canvas#sample{display:none}
 </style>
@@ -54,4 +62,9 @@ if(points.length){gc.beginPath();gc.strokeStyle='#55e6b1';gc.lineWidth=2.5;point
 function exportCSV(){const lines=['Sekunden;Leistung_W'];points.forEach(p=>lines.push(fmt(p.s,2)+';'+fmt(p.w,2)));const blob=new Blob(['\uFEFF'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='stromzaehler-messung.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000)}
 $('start').onclick=start;$('stop').onclick=stop;$('reset').onclick=reset;$('csv').onclick=exportCSV;$('sensitivity').oninput=()=>{$('sensLabel').textContent=$('sensitivity').value};window.addEventListener('resize',draw);document.addEventListener('visibilitychange',()=>{if(document.hidden&&running)stop()});draw();
 })();
+</script>
+<script>
+if ('serviceWorker' in navigator) window.addEventListener('load', () => {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+});
 </script></body></html>
