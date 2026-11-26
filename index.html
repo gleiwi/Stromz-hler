@@ -1,46 +1,57 @@
 <!doctype html>
-<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#101827"><title>Stromzähler LED-Messer</title>
-<style>:root{color-scheme:dark;font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif}*{box-sizing:border-box}body{margin:0;background:#101827;color:#f2f6fc}main{max-width:620px;margin:auto;padding:20px 16px 45px}h1{font-size:1.55rem;margin:8px 0}p{color:#bec9d8;line-height:1.45}.viewer{position:relative;background:#050810;border-radius:16px;overflow:hidden;aspect-ratio:4/3;border:1px solid #344458}video{height:100%;width:100%;object-fit:cover}.target{position:absolute;left:50%;top:50%;width:44px;height:44px;transform:translate(-50%,-50%);border:2px solid #50e6b1;border-radius:50%;box-shadow:0 0 0 100vmax #0000;pointer-events:none}.target:before,.target:after{content:'';position:absolute;background:#50e6b1}.target:before{left:50%;top:-9px;bottom:-9px;width:1px}.target:after{top:50%;left:-9px;right:-9px;height:1px}.actions{display:flex;gap:9px;margin:14px 0;flex-wrap:wrap}button{background:#32d7aa;color:#06291f;border:0;border-radius:11px;padding:12px 16px;font-size:1rem;font-weight:700}button.secondary{background:#2a3c53;color:#fff}button:disabled{opacity:.5}.panel{background:#1b293b;border:1px solid #33465c;border-radius:14px;padding:14px;margin:13px 0}.power{font-size:3rem;font-weight:800;font-variant-numeric:tabular-nums}.muted{color:#a8b8cb;font-size:.88rem}.row{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:9px 0}.row strong{font-variant-numeric:tabular-nums}.flash{display:inline-block;width:12px;height:12px;border-radius:50%;background:#3c556e;margin-right:8px}.flash.on{background:#ff424c;box-shadow:0 0 15px #ff424c}.signal{height:12px;border-radius:8px;background:#0c1522;overflow:hidden}.signal>div{height:100%;width:0;background:#ff5463;transition:width .08s}input[type=range]{width:100%;accent-color:#32d7aa}input[type=number]{width:110px;font-size:1rem;background:#0d1929;color:white;border:1px solid #50617a;border-radius:8px;padding:8px}#status{min-height:2.5em}small{color:#9daec2}canvas{display:none}</style></head>
-<body><main><h1>⚡ Stromzähler LED-Messer</h1><p>Richte die Rückkamera auf die Impuls-LED. Die LED sollte möglichst genau im grünen Fadenkreuz liegen und groß genug erscheinen.</p>
-<div class="viewer"><video id="video" autoplay playsinline muted></video><div class="target"></div></div>
-<div class="actions"><button id="start">Kamera starten</button><button id="stop" class="secondary" disabled>Kamera stoppen</button><button id="reset" class="secondary">Messung zurücksetzen</button></div>
-<div class="panel"><div class="muted">Aktuelle Leistung (aus letztem Impulsabstand)</div><div class="power"><span id="watts">–</span> <span style="font-size:1.15rem">W</span></div><div class="row"><span>Letzter Impulsabstand</span><strong id="interval">– s</strong></div><div class="row"><span>Erkannte Impulse</span><strong id="count">0</strong></div><div class="row"><span><i id="led" class="flash"></i>LED-Signal</span><strong id="value">–</strong></div><div class="signal"><div id="bar"></div></div></div>
-<div class="panel"><div class="row"><label for="impulses">Impulse pro kWh</label><input type="number" min="1" max="100000" id="impulses" value="2500"></div><label for="sensitivity">Erkennungsschwelle: <strong id="thresholdValue">35</strong></label><input id="sensitivity" type="range" min="8" max="160" step="1" value="35"><small>Bei Fehlmessungen höher stellen; werden Blinkimpulse übersehen, niedriger stellen. Am besten möglichst dicht an die LED gehen.</small></div>
-<p id="status" role="status">Bereit. Die Kamera funktioniert nur über HTTPS oder localhost und benötigt deine Freigabe.</p><small>Die Bildverarbeitung erfolgt ausschließlich auf deinem Gerät. Es werden keine Kamerabilder hochgeladen. Safari muss geöffnet und aktiv bleiben. Die Kamera erkennt sehr kurze Impulse möglicherweise nicht zuverlässig.</small><canvas id="canvas" width="160" height="120"></canvas></main>
+<html lang="de">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0e1728"><title>Stromzähler LED-Messer</title>
+<style>
+:root{color-scheme:dark;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0e1728;color:#f1f5f9}*{box-sizing:border-box}body{margin:0;padding:16px 14px 40px;max-width:750px;margin-inline:auto}h1{font-size:1.45rem;margin:10px 0 4px}h2{font-size:1.05rem;margin:0 0 10px}.muted{color:#9fb0c8;font-size:.87rem}section{background:#19263b;border:1px solid #293954;border-radius:16px;padding:15px;margin-top:14px}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.metric{background:#101d30;border-radius:12px;padding:13px}.metric strong{display:block;font-size:1.7rem;font-variant-numeric:tabular-nums}.metric span{font-size:.82rem;color:#aabbd3}.primary strong{font-size:2.4rem;color:#7ae4b6}button,input,select{font:inherit}button{border:0;border-radius:10px;padding:11px 15px;font-weight:650;background:#324966;color:#fff}button.main{background:#3ac790;color:#071c14}button:disabled{opacity:.5}input[type=number]{width:110px;background:#0e1728;border:1px solid #50627b;color:#fff;border-radius:8px;padding:7px}input[type=range]{width:100%;accent-color:#3ac790}.setting{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0}.cameraBox{position:relative;background:#050b14;border-radius:12px;overflow:hidden;aspect-ratio:4/3;max-height:320px}video{width:100%;height:100%;object-fit:cover}.target{position:absolute;left:50%;top:50%;width:64px;height:64px;transform:translate(-50%,-50%);border:2px solid #6bf0bc;border-radius:50%;box-shadow:0 0 0 999px #0003;pointer-events:none}.target:before,.target:after{content:"";position:absolute;background:#6bf0bc}.target:before{width:20px;height:1px;left:20px;top:30px}.target:after{height:20px;width:1px;left:30px;top:20px}.live{display:inline-block;width:9px;height:9px;border-radius:50%;background:#708196;margin-right:6px}.live.active{background:#3ce7a4}.live.flash{background:#ff4e69;box-shadow:0 0 10px #f54}#graph{width:100%;height:270px;display:block;border-radius:9px;background:#0e1728}.legend{font-size:.8rem;color:#bdcde1}#status{min-height:1.3em}.note{line-height:1.5}small{font-size:.8rem}canvas#sample{display:none}
+</style>
+</head>
+<body>
+<h1>⚡ Stromzähler LED-Messer</h1><div class="muted">Live-Leistung und Verlauf direkt mit der iPhone-Kamera</div>
+<section>
+  <div class="row"><button id="start" class="main">Kamera starten</button><button id="stop" disabled>Stoppen</button><span class="muted"><span id="pulseDot" class="live"></span><span id="status">Bereit</span></span></div>
+  <div class="cameraBox" style="margin-top:12px"><video id="video" autoplay muted playsinline></video><div class="target"></div></div>
+  <p class="muted note">Richte den grünen Kreis möglichst genau auf die blinkende LED. Das iPhone dabei ruhig halten. Kamera-Zugriff funktioniert in Safari über HTTPS.</p>
+  <div class="setting"><label for="impulses">Impulse pro kWh</label><input id="impulses" type="number" min="1" step="1" value="2500"></div>
+  <div class="setting"><label for="sensitivity">Empfindlichkeit: <b id="sensLabel">24</b></label><span class="muted" id="intensity">Signal: –</span></div>
+  <input id="sensitivity" aria-label="Empfindlichkeit" type="range" min="4" max="90" value="24">
+  <p class="muted">Niedrigere Schwelle = empfindlicher, aber störanfälliger. Ein erkannter Impuls lässt den Punkt kurz rot aufleuchten.</p>
+</section>
+<div class="metrics">
+  <div class="metric primary"><span>Momentanleistung</span><strong><span id="watts">–</span> W</strong></div>
+  <div class="metric"><span>Letzter Impulsabstand</span><strong><span id="period">–</span> s</strong></div>
+  <div class="metric"><span>Gezählte Impulse</span><strong id="pulses">0</strong></div>
+  <div class="metric"><span>Gemessene Energie</span><strong><span id="energy">0,000</span> Wh</strong></div>
+</div>
+<section>
+  <h2>Leistungsverlauf</h2>
+  <canvas id="graph" aria-label="Liniengraph: Leistung in Watt über die Messzeit"></canvas>
+  <div class="row" style="justify-content:space-between;margin-top:10px"><span class="legend">X: Messdauer · Y: Watt · Verlauf ab dem zweiten Impuls</span><button id="reset">Verlauf löschen</button></div>
+  <div class="row" style="margin-top:10px"><button id="csv">Messwerte als CSV exportieren</button></div>
+</section>
+<p class="muted note">Die Messung ermittelt einen neuen Leistungswert jeweils aus dem Abstand zweier LED-Impulse. Deshalb reagiert der Graph bei geringer Last zeitverzögert. Der letzte Wert bleibt bis zum nächsten Impuls stehen und ist keine kontinuierliche Echtzeitmessung.</p>
+<canvas id="sample" width="48" height="48"></canvas>
 <script>
-'use strict';
-const $=id=>document.getElementById(id),v=$('video'),canvas=$('canvas'),ctx=canvas.getContext('2d',{willReadFrequently:true});
-let stream=null,active=false,raf=0,baseline=null,above=false,lastPulse=null,count=0,peak=0,brightFrames=0,lastFrame=0;
-const status=t=>$('status').textContent=t;
-function reset(){lastPulse=null;count=0;above=false;baseline=null;peak=0;brightFrames=0;$('watts').textContent='–';$('interval').textContent='– s';$('count').textContent='0';$('led').classList.remove('on');$('value').textContent='–';$('bar').style.width='0%';if(active)status('Messung zurückgesetzt. Warte auf LED-Impulse …')}
-$('reset').addEventListener('click',reset);$('sensitivity').addEventListener('input',()=>{$('thresholdValue').textContent=$('sensitivity').value});
-function tick(now){if(!active)return;raf=requestAnimationFrame(tick);if(v.readyState<2)return;if(now-lastFrame<24)return;lastFrame=now;
-ctx.drawImage(v,0,0,160,120);
-// Pixelwerte nur aus der kleinen Zielzone in der Bildmitte auswerten.
-const pix=ctx.getImageData(72,52,16,16).data;let sum=0;for(let i=0;i<pix.length;i+=4){const r=pix[i],g=pix[i+1],b=pix[i+2];sum+=Math.max(0,r-(g+b)*.5)}const red=sum/256;
-if(baseline===null)baseline=red;
-const delta=red-baseline;
-const threshold=Number($('sensitivity').value);
-const lit=delta>threshold;
-$('value').textContent=Math.round(red)+' / Δ '+Math.round(delta);
-$('bar').style.width=Math.max(0,Math.min(100,delta/180*100))+'%';
-$('led').classList.toggle('on',lit);
-// Adaptive Grundlinie: nur in Dunkelphasen aktualisieren.
-if(!lit)baseline+=0.035*(red-baseline);
-if(lit){brightFrames++;peak=Math.max(peak,delta)}else{brightFrames=0;peak=0}
-// Entprellung und Mindestabstand, um Helligkeitsrauschen nicht doppelt zu zählen.
-if(lit&&!above&&(lastPulse===null||now-lastPulse>220)){
- count++;$('count').textContent=count;
- if(lastPulse!==null){const s=(now-lastPulse)/1000;const imp=Number($('impulses').value);if(imp>0){$('interval').textContent=s.toFixed(2)+' s';$('watts').textContent=(3600000/(imp*s)).toFixed(1);status('Messung läuft – die Leistung basiert auf dem letzten Impulsabstand.')}}
- else status('Erster Impuls erkannt. Warte auf den nächsten …');
- lastPulse=now;
-}
-above=lit;
-}
-async function start(){if(active)return;if(!navigator.mediaDevices?.getUserMedia){status('Kein Kamerazugriff: Öffne die Seite über HTTPS in Safari.');return}try{
- stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720},frameRate:{ideal:60,max:60}}});
- v.srcObject=stream;await v.play();active=true;reset();$('start').disabled=true;$('stop').disabled=false;status('Kamera aktiv. Richte das Fadenkreuz auf die rote Impuls-LED.');raf=requestAnimationFrame(tick);
-}catch(e){status('Kamera konnte nicht gestartet werden: '+e.message+' — Bitte Safari-Kameraberechtigung prüfen.')}}
-function stop(){active=false;cancelAnimationFrame(raf);if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}v.srcObject=null;$('start').disabled=false;$('stop').disabled=true;$('led').classList.remove('on');status('Kamera gestoppt.')}
-$('start').addEventListener('click',start);$('stop').addEventListener('click',stop);document.addEventListener('visibilitychange',()=>{if(document.hidden&&active)stop()});
+(()=>{'use strict';
+const $=id=>document.getElementById(id),v=$('video'),sample=$('sample'),sctx=sample.getContext('2d',{willReadFrequently:true}),g=$('graph'),gc=g.getContext('2d');
+const points=[]; let stream=null,running=false,frame=0,lastFrame=0,lastPulse=null,lastOn=false,baseline=null,pulseCount=0,watts=null,begin=null,latestSignal=0,flashUntil=0;
+const fmt=(n,d=1)=>n.toLocaleString('de-DE',{minimumFractionDigits:d,maximumFractionDigits:d});
+function status(t){$('status').textContent=t}
+function reset(){points.length=0;lastPulse=null;pulseCount=0;watts=null;begin=performance.now();baseline=null;lastOn=false;$('watts').textContent='–';$('period').textContent='–';$('pulses').textContent='0';$('energy').textContent='0,000';draw()}
+function pulse(now){if(lastPulse!==null){const dt=(now-lastPulse)/1000;if(dt<0.08)return;const imp=Number($('impulses').value)||2500;watts=3600000/(imp*dt);$('watts').textContent=fmt(watts,1);$('period').textContent=fmt(dt,2);points.push({s:(now-begin)/1000,w:watts});if(points.length>3000)points.shift();draw()}lastPulse=now;pulseCount++;$('pulses').textContent=String(pulseCount);$('energy').textContent=fmt(pulseCount*1000/(Number($('impulses').value)||2500),3);flashUntil=now+220}
+function detect(now){if(!running)return;frame=requestAnimationFrame(detect);if(now-lastFrame<20||v.readyState<2)return;lastFrame=now;
+try{sctx.drawImage(v,v.videoWidth*0.45,v.videoHeight*0.45,v.videoWidth*0.1,v.videoHeight*0.1,0,0,48,48);const data=sctx.getImageData(0,0,48,48).data;let bright=0;for(let i=0;i<data.length;i+=4){const red=data[i],green=data[i+1],blue=data[i+2];const score=Math.max(0,red-Math.max(green,blue)*0.45);if(score>bright)bright=score}latestSignal=bright;if(baseline===null)baseline=bright;const threshold=Number($('sensitivity').value);const on=bright>baseline+threshold && bright>35;
+if(on&&!lastOn && (lastPulse===null || now-lastPulse>90))pulse(now);lastOn=on;
+if(!on)baseline=baseline*0.96+bright*0.04;else baseline=baseline*0.999+bright*0.001;
+$('intensity').textContent='Signal: '+Math.round(bright);$('pulseDot').className='live '+(now<flashUntil?'flash':'active');}catch(e){status('Bildauswertung fehlgeschlagen')}}
+async function start(){if(running)return;try{stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720},frameRate:{ideal:60,max:60}}});v.srcObject=stream;await v.play();running=true;reset();$('start').disabled=true;$('stop').disabled=false;status('Kamera aktiv – LED anvisieren');frame=requestAnimationFrame(detect)}catch(e){status('Kein Kamerazugriff: '+(e.name==='NotAllowedError'?'Bitte in Safari erlauben':e.message))}}
+function stop(){running=false;cancelAnimationFrame(frame);if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;v.srcObject=null;$('start').disabled=false;$('stop').disabled=true;$('pulseDot').className='live';status('Messung gestoppt');draw()}
+function draw(){const rect=g.getBoundingClientRect(),w=Math.max(rect.width,280),h=270,dpr=Math.min(window.devicePixelRatio||1,3);g.width=Math.round(w*dpr);g.height=Math.round(h*dpr);gc.setTransform(dpr,0,0,dpr,0,0);gc.clearRect(0,0,w,h);let l=49,r=12,t=12,b=34,W=w-l-r,H=h-t-b;
+const duration=Math.max(30,points.length?points[points.length-1].s:0,(running&&begin!==null)?(performance.now()-begin)/1000:0);const upper=Math.max(100,Math.ceil((Math.max(0,...points.map(p=>p.w))*1.12)/100)*100);
+gc.font='12px -apple-system, sans-serif';gc.lineWidth=1;gc.strokeStyle='#2f415a';gc.fillStyle='#b4c4da';for(let i=0;i<=4;i++){const y=t+H*(1-i/4);gc.beginPath();gc.moveTo(l,y);gc.lineTo(l+W,y);gc.stroke();gc.textAlign='right';gc.fillText(fmt(upper*i/4,0),l-7,y+4)}for(let i=0;i<=4;i++){const x=l+W*i/4;gc.beginPath();gc.moveTo(x,t);gc.lineTo(x,t+H);gc.stroke();gc.textAlign='center';gc.fillText(fmt(duration*i/4,0)+'s',x,t+H+19)}
+if(points.length){gc.beginPath();gc.strokeStyle='#55e6b1';gc.lineWidth=2.5;points.forEach((p,i)=>{const x=l+W*p.s/duration,y=t+H*(1-p.w/upper);if(i===0)gc.moveTo(x,y);else gc.lineTo(x,y)});gc.stroke();const p=points[points.length-1];gc.fillStyle='#55e6b1';gc.beginPath();gc.arc(l+W*p.s/duration,t+H*(1-p.w/upper),4,0,Math.PI*2);gc.fill()}else{gc.fillStyle='#8497b1';gc.textAlign='center';gc.fillText('Warte auf zwei erkannte LED-Impulse',l+W/2,t+H/2)} }
+function exportCSV(){const lines=['Sekunden;Leistung_W'];points.forEach(p=>lines.push(fmt(p.s,2)+';'+fmt(p.w,2)));const blob=new Blob(['\uFEFF'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='stromzaehler-messung.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000)}
+$('start').onclick=start;$('stop').onclick=stop;$('reset').onclick=reset;$('csv').onclick=exportCSV;$('sensitivity').oninput=()=>{$('sensLabel').textContent=$('sensitivity').value};window.addEventListener('resize',draw);document.addEventListener('visibilitychange',()=>{if(document.hidden&&running)stop()});draw();
+})();
 </script></body></html>
